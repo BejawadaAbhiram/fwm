@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate Food | FoodRescue</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="site-header"><a class="brand" href="index.html">Food<span>Rescue</span></a><nav class="site-nav"><a href="index.html">Home</a><a class="active" href="donateForm.html">Donate Food</a><a href="companyDetails.html">About</a><a data-auth-link href="login.html">Login</a><button class="nav-logout" data-logout hidden type="button">Log out</button></nav></header>
+    <main class="container"><section class="page-intro"><p class="eyebrow">Share what you can</p><h1>Food donation form</h1><p class="muted">Tell us what is available and when it can be collected. All fields help the team plan a smooth handoff.</p></section>
+        <section class="form-card"><div id="donation-message" aria-live="polite"></div><form id="donation-form">
+            <fieldset><legend>Donor details</legend><div class="form-grid"><div class="field"><label for="name">Donor name</label><input id="name" name="name" type="text" required></div><div class="field"><label for="phone">Phone</label><input id="phone" name="phone" type="tel" required></div><div class="field full"><label for="email">Email</label><input id="email" name="email" type="email" required></div></div></fieldset>
+            <fieldset><legend>Food details</legend><div class="form-grid"><div class="field full"><span class="field-label">Food type</span><div class="radio-row"><label><input type="radio" name="food_type" value="Veg" required> Veg</label><label><input type="radio" name="food_type" value="Non-Veg"> Non-Veg</label><label><input type="radio" name="food_type" value="Both"> Both</label></div></div><div class="field"><label for="food_items">Food items</label><input id="food_items" name="food_items" type="text" placeholder="e.g. rice and vegetables" required></div><div class="field"><label for="quantity">Quantity</label><input id="quantity" name="quantity" type="number" min="1" step="1" placeholder="Servings or boxes" required></div></div></fieldset>
+            <fieldset><legend>Pickup details</legend><div class="form-grid"><div class="field full"><span class="field-label">Packing assistance</span><div class="radio-row"><label><input type="radio" name="packing_assistance" value="Yes" required> Yes</label><label><input type="radio" name="packing_assistance" value="No"> No</label></div></div><div class="field full"><label for="address">Pickup address</label><textarea id="address" name="address" rows="4" required></textarea></div><div class="field"><label for="pickup_date">Pickup date</label><input id="pickup_date" name="pickup_date" type="date" required></div><div class="field"><label for="pickup_time">Pickup time</label><input id="pickup_time" name="pickup_time" type="time" required></div></div></fieldset>
+            <button class="primary" type="submit">Submit donation</button> <button class="secondary" type="reset">Clear form</button>
+        </form></section>
+    </main>
+    <footer class="site-footer"><div class="footer-inner"><span>FoodRescue</span><span>Frontend academic project</span></div></footer>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard | FoodRescue</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="site-header"><a class="brand" href="index.html">Food<span>Rescue</span></a><nav class="site-nav"><a href="index.html">Home</a><a href="donateForm.html">Donate Food</a><a href="companyDetails.html">About</a><button class="nav-logout" data-logout type="button">Log out</button></nav></header>
+    <main class="container">
+        <section class="dashboard-header page-intro"><div><p class="eyebrow">Your dashboard</p><h1>Welcome, <span id="welcome-name">there</span></h1><p class="muted">Help reduce food waste, one donation at a time.</p></div><a class="button primary" href="donateForm.html">Donate surplus food</a></section>
+        <section aria-label="Donation statistics" class="stats-grid"><div class="stat"><span>Total donations</span><strong id="user-total">0</strong></div><div class="stat"><span>Pending</span><strong id="user-pending">0</strong></div><div class="stat"><span>Completed</span><strong id="user-completed">0</strong></div></section>
+        <section><h2 class="section-heading">Donation history</h2><div class="table-wrap"><table><thead><tr><th>Donation ID</th><th>Food</th><th>Quantity</th><th>Pickup date</th><th>Status</th></tr></thead><tbody id="user-donations"></tbody></table></div></section>
+    </main>
+    <footer class="site-footer"><div class="footer-inner"><span>FoodRescue</span><span>Frontend academic project</span></div></footer>
+    <script src="script.js"></script>
+</body>
+</html>

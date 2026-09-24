@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | FoodRescue</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="site-header"><a class="brand" href="index.html">Food<span>Rescue</span></a><nav class="site-nav"><a href="index.html">Home</a><a href="companyDetails.html">About</a><a class="active" href="login.html">Login</a></nav></header>
+    <main class="container auth-layout"><section class="form-card auth-card" aria-labelledby="signup-title">
+        <p class="eyebrow">Join the community</p><h1 id="signup-title">Create your account</h1><p class="muted">A simple account keeps your donation history in one place.</p>
+        <div id="signup-message" aria-live="polite"></div>
+        <form id="signup-form">
+            <div class="field"><label for="signup-name">Full name</label><input id="signup-name" name="name" type="text" required autocomplete="name"></div>
+            <div class="field"><label for="signup-email">Email</label><input id="signup-email" name="email" type="email" required autocomplete="email"></div>
+            <div class="field"><label for="signup-phone">Phone</label><input id="signup-phone" name="phone" type="tel" required autocomplete="tel"></div>
+            <div class="field"><label for="signup-password">Password</label><input id="signup-password" name="password" type="password" minlength="6" required autocomplete="new-password"></div>
+            <button class="primary" type="submit">Create account</button>
+        </form>
+        <p class="muted">Already registered? <a href="login.html">Log in</a></p>
+    </section></main>
+    <footer class="site-footer"><div class="footer-inner"><span>FoodRescue</span><span>Frontend academic project</span></div></footer>
+    <script src="script.js"></script>
+</body>
+</html>

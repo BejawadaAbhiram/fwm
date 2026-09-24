@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | FoodRescue</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="site-header"><a class="brand" href="index.html">Food<span>Rescue</span></a><nav class="site-nav"><a href="index.html">Home</a><a href="companyDetails.html">About</a><button class="nav-logout" data-logout type="button">Log out</button></nav></header>
+    <main class="container">
+        <section class="page-intro"><p class="eyebrow">Administration</p><h1>Operations dashboard</h1><p class="muted">Review donation activity and keep records up to date.</p></section>
+        <section aria-label="Admin statistics" class="stats-grid"><div class="stat"><span>Registered users</span><strong id="admin-total-users">0</strong></div><div class="stat"><span>Total donations</span><strong id="admin-total-donations">0</strong></div><div class="stat"><span>Pending</span><strong id="admin-pending">0</strong></div><div class="stat"><span>Completed</span><strong id="admin-completed">0</strong></div></section>
+        <section><h2 class="section-heading">Donation management</h2><div class="table-wrap"><table><thead><tr><th>Donation ID</th><th>Donor</th><th>Food and quantity</th><th>Pickup</th><th>Details</th><th>Status</th><th>Action</th></tr></thead><tbody id="admin-donations"></tbody></table></div></section>
+        <section><h2 class="section-heading">Registered users</h2><div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th></tr></thead><tbody id="admin-users"></tbody></table></div></section>
+    </main>
+    <footer class="site-footer"><div class="footer-inner"><span>FoodRescue</span><span>Admin area</span></div></footer>
+    <script src="script.js"></script>
+</body>
+</html>

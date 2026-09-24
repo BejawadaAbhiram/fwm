@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In | FoodRescue</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="site-header"><a class="brand" href="index.html">Food<span>Rescue</span></a><nav class="site-nav"><a href="index.html">Home</a><a href="companyDetails.html">About</a><a class="active" href="login.html">Login</a></nav></header>
+    <main class="container auth-layout"><section class="form-card auth-card" aria-labelledby="login-title">
+        <p class="eyebrow">Welcome back</p><h1 id="login-title">Log in to continue</h1><p class="muted">Manage your donations and help good food reach people who need it.</p>
+        <div id="login-message" aria-live="polite"></div>
+        <form id="login-form">
+            <div class="field"><label for="login-email">Email</label><input id="login-email" name="email" type="email" required autocomplete="email"></div>
+            <div class="field"><label for="login-password">Password</label><input id="login-password" name="password" type="password" required autocomplete="current-password"></div>
+            <button class="primary" type="submit">Log in</button>
+        </form>
+        <p class="muted">New here? <a href="signup.html">Create an account</a></p>
+    </section></main>
+    <footer class="site-footer"><div class="footer-inner"><span>FoodRescue</span><span>Frontend academic project</span></div></footer>
+    <script src="script.js"></script>
+</body>
+</html>
