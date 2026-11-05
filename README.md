@@ -1,51 +1,65 @@
-# Food Waste Management
+# 🍽️ Food Waste Management System (FoodRescue)
 
-FoodRescue is a simple frontend-only academic project for recording safe surplus food donations and following their progress. It demonstrates how a small community workflow can support food waste reduction without a backend.
+## 📌 Project Overview
 
-## Problem Statement
+FoodRescue is a web-based Food Waste Management System designed to reduce food wastage by connecting food donors with people who need food.
 
-Usable surplus food can be wasted when donors do not have a simple way to describe it and coordinate collection. This project models a clear donation and tracking workflow.
+The application allows users to register, log in, submit surplus food donation details, and track their donation status. Administrators can manage users, monitor donations, and update donation statuses.
 
-## Objectives
+The main goal of this project is to encourage food donation, reduce food wastage, and promote a responsible community.
 
-- Encourage responsible food donation.
-- Record food, quantity, and pickup details clearly.
-- Let donors follow the status of their submissions.
-- Give an administrator a simple view of users and donations.
+## 🎯 Objectives
 
-## Features
+- Reduce food wastage by encouraging food donations.
+- Provide a simple platform for donating surplus food.
+- Allow users to track their donation history.
+- Help administrators manage food donations.
+- Promote social responsibility and community support.
 
-- Responsive homepage with process, purpose, and calls to action.
-- User signup, login, logout, and frontend route protection.
-- Food donation form with validation for all original fields.
-- User dashboard with donation history and status statistics.
-- Admin dashboard with user list, donation details, statistics, status updates, and deletion.
-- Friendly empty states and validation messages.
-- Browser Local Storage persistence.
+## ✨ Features
 
-## Business Modules
+### 👤 User Module
+- User Registration and Login.
+- Securely navigate user pages within the frontend demo.
+- Submit surplus food donation details.
+- View personal donation history.
+- Track donation status.
+- Logout functionality.
 
-### User Module
+### 🛠️ Admin Module
+- Admin Login.
+- View registered users.
+- View all food donations.
+- Monitor donation statistics.
+- Accept or reject donations.
+- Update donation status.
+- Delete donation records.
 
-Users create an account, log in, submit surplus food, and view their own donation history. A donation starts with `Pending` status and can later be updated by the administrator.
+### 📊 Donation Status
+Donations can have the following statuses:
 
-### Admin Module
+- Pending
+- Accepted
+- Picked Up
+- Completed
+- Rejected
 
-Administrators log in using the demo admin account, view registered users, inspect donation details, update donation status, and delete test or inappropriate records. Available statuses are `Pending`, `Accepted`, `Picked Up`, `Completed`, and `Rejected`.
+## 💻 Technologies Used
 
-## Technologies
+| Technology | Purpose |
+|---|---|
+| HTML5 | Webpage structure |
+| CSS3 | Styling and responsive design |
+| JavaScript | Functionality and validation |
+| Local Storage | Storing user and donation data |
 
-- HTML5
-- CSS3 using Grid and Flexbox
-- Vanilla JavaScript
-- Browser Local Storage
-
-No framework, package manager, backend, database, or external service is used.
-
-## Project Structure
+## 📂 Project Structure
 
 ```text
 Food-Waste-Management/
+│
+├── images/
+│
 ├── index.html
 ├── login.html
 ├── signup.html
@@ -53,60 +67,52 @@ Food-Waste-Management/
 ├── userDashboard.html
 ├── admin.html
 ├── companyDetails.html
+│
 ├── style.css
 ├── script.js
-├── images/
+│
 └── README.md
 ```
 
-## Local Storage Structure
+## 🔄 How It Works
 
-The application uses these keys:
+1. Users visit the FoodRescue homepage.
+2. New users register and existing users log in.
+3. Users submit surplus food donation details.
+4. Donation information is stored in Local Storage.
+5. Users can view their donation history and status.
+6. Admin reviews submitted donations.
+7. Admin updates the donation status.
+8. Users can view the updated status on their dashboard.
 
-- `foodWaste_users`: user objects containing `id`, `name`, `email`, `phone`, `password`, and `role`.
-- `foodWaste_donations`: donation objects containing donor, food, pickup, status, and creation details.
-- `foodWaste_currentUser`: the current logged-in user session.
+## 🔐 Data Storage
 
-Passwords are stored as plain text because this is a local academic demonstration. This is not secure authentication and must not be used for a real service.
+This project uses Browser Local Storage to store:
 
-## Login and Signup Flow
+- User information.
+- Donation information.
+- Current login session.
 
-1. A new visitor creates an account on `signup.html`.
-2. The account is saved to Local Storage after validation.
-3. The user logs in on `login.html`.
-4. Users go to `userDashboard.html`; the administrator goes to `admin.html`.
-5. Logout removes the current session from Local Storage.
+**Note:** This is an academic frontend project. Local Storage does not provide secure authentication or centralized data management. It is not intended for production use.
 
-The demo administrator is initialized automatically:
+## 🚀 Future Enhancements
 
-```text
-Email: admin@foodrescue.local
-Password: admin123
-```
+- Backend integration using Node.js.
+- Database integration using MongoDB or MySQL.
+- Real-time food donation tracking.
+- Location-based donor and receiver matching.
+- Email and SMS notifications.
+- Food expiry date monitoring.
+- Mobile application integration.
 
-## Donation Workflow
+## 🌍 Social Impact
 
-1. A logged-in user opens `donateForm.html`.
-2. The form validates contact, food, quantity, and pickup information.
-3. A unique donation record is saved with `Pending` status and the user's ID.
-4. The user is redirected to their dashboard to see the new record.
-5. An administrator can review details and update the status.
+FoodRescue aims to create awareness about food wastage and encourage people to donate surplus food instead of throwing it away.
 
-## Admin Workflow
+By connecting donors and communities, this project supports a more sustainable and responsible society.
 
-1. Log in with the demo admin account.
-2. Review user and donation statistics.
-3. Open donation details, change status, or delete a record.
-4. The donor sees the updated status after refreshing their dashboard.
+---
 
-## How to Run
+⭐ If you find this project useful, consider giving it a star!
 
-Open `index.html` in a modern browser. No installation or server is required. For the most consistent browser behavior, use VS Code Live Server or another static-file server if one is already available, but do not install project dependencies.
-
-## Git Workflow
-
-Review changes with `git status` before each logical commit. Suggested commit groups include homepage styling, authentication, donation storage, dashboards, responsive UI, and documentation. Do not commit generated files or push to GitHub without review.
-
-## Limitations
-
-This is a frontend-only academic project. Local Storage is used instead of a backend or database, so data is limited to the current browser and can be edited or cleared by the user. It does not provide secure authentication, real pickup coordination, notifications, or real-world food collection services.
+**FoodRescue – Save Food, Share Happiness! ❤️**
