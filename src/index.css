@@ -67,6 +67,9 @@ legend { color: var(--green-900); font-size: 1.15rem; font-weight: 700; margin-b
 .form-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, 1fr); }
 .field { display: flex; flex-direction: column; gap: 0.35rem; }
 .field.full { grid-column: 1 / -1; }
+.pickup-map { border: 1px solid var(--line); border-radius: 5px; height: 340px; width: 100%; }
+.map-help, .map-status { margin: 0; }
+.locate-button { align-self: flex-start; margin-top: 0.5rem; }
 label { font-weight: 700; }
 input, select, textarea { background: var(--white); border: 1px solid #cbd9ce; border-radius: 5px; color: var(--ink); padding: 0.7rem; width: 100%; }
 input:focus, select:focus, textarea:focus { border-color: var(--green-500); outline: 2px solid var(--green-100); }

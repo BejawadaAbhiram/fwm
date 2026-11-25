@@ -1,4 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerIconRetina from 'leaflet/dist/images/marker-icon-2x.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 const STORAGE_KEYS = {
   users: 'foodWaste_users',
@@ -138,6 +143,8 @@ function App() {
       quantity: Number(formData.quantity),
       packingAssistance: formData.packing_assistance,
       pickupAddress: formData.address.trim(),
+      pickupLatitude: formData.pickup_latitude,
+      pickupLongitude: formData.pickup_longitude,
       pickupDate: formData.pickup_date,
       pickupTime: formData.pickup_time,
       status: 'Pending',
@@ -471,6 +478,128 @@ function SignupPage({ onSubmit, onNavigate }) {
   );
 }
 
+const pickupMarkerIcon = L.icon({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIconRetina,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
+function PickupLocationMap({ onLocationChange, onAddressLookup, addressEditRef }) {
+  const mapContainerRef = useRef(null);
+  const mapRef = useRef(null);
+  const selectLocationRef = useRef(null);
+  const lastLookupStartedRef = useRef(0);
+  const selectionIdRef = useRef(0);
+  const markerRef = useRef(null);
+  const lookupTimerRef = useRef(null);
+  const [status, setStatus] = useState('Click the map to choose a pickup point, or enter an address manually.');
+
+  useEffect(() => {
+    const map = L.map(mapContainerRef.current).setView([20.5937, 78.9629], 5);
+    const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+    mapRef.current = map;
+
+
+    const lookupAddress = async (latitude, longitude, selectedId, editId) => {
+      lastLookupStartedRef.current = Date.now();
+      setStatus('Looking up the address for this pin...');
+      try {
+        const query = new URLSearchParams({ format: 'jsonv2', lat: latitude, lon: longitude });
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${query}`);
+        if (!response.ok) {
+          throw new Error(`Address lookup failed with status ${response.status}.`);
+        }
+        const result = await response.json();
+        if (selectedId !== selectionIdRef.current) {
+          return;
+        }
+        if (!result.display_name) {
+          throw new Error('No address was returned for this point.');
+        }
+        if (addressEditRef.current !== editId) {
+          setStatus('Pin selected. Your manually edited address was kept.');
+          return;
+        }
+        onAddressLookup(result.display_name);
+        setStatus('Pickup address updated from the map pin.');
+      } catch (error) {
+        console.error('Could not look up the pickup address.', error);
+        if (selectedId === selectionIdRef.current) {
+          setStatus('Could not look up this address. Enter or correct it manually.');
+        }
+      }
+    };
+
+    const selectLocation = (location) => {
+      selectionIdRef.current += 1;
+      const selectedId = selectionIdRef.current;
+      const editId = addressEditRef.current;
+      const latitude = location.lat;
+      const longitude = location.lng;
+      onLocationChange({ pickup_latitude: latitude, pickup_longitude: longitude });
+      if (markerRef.current) {
+        markerRef.current.setLatLng(location);
+      } else {
+        markerRef.current = L.marker(location, { icon: pickupMarkerIcon }).addTo(map);
+      }
+      setStatus('Pin selected. Looking up the address...');
+      window.clearTimeout(lookupTimerRef.current);
+      const wait = Math.max(1100 - (Date.now() - lastLookupStartedRef.current), 0);
+      lookupTimerRef.current = window.setTimeout(() => lookupAddress(latitude, longitude, selectedId, editId), wait);
+    };
+
+    const handleMapClick = (event) => selectLocation(event.latlng);
+    const handleTileError = () => setStatus('Map tiles could not load. Check your internet connection.');
+    map.on('click', handleMapClick);
+    tiles.on('tileerror', handleTileError);
+    selectLocationRef.current = selectLocation;
+
+    return () => {
+      selectionIdRef.current += 1;
+      window.clearTimeout(lookupTimerRef.current);
+      map.off('click', handleMapClick);
+      tiles.off('tileerror', handleTileError);
+      map.remove();
+      mapRef.current = null;
+      markerRef.current = null;
+      selectLocationRef.current = null;
+    };
+  }, [addressEditRef, onAddressLookup, onLocationChange]);
+
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setStatus('Location access is not available in this browser. You can still click the map.');
+      return;
+    }
+    setStatus('Finding your current location...');
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const location = L.latLng(position.coords.latitude, position.coords.longitude);
+        mapRef.current?.setView(location, 16);
+        selectLocationRef.current?.(location);
+      },
+      () => setStatus('Could not access your location. Check browser permission or click the map.'),
+    );
+  };
+
+  return (
+    <div className="field full">
+      <span className="field-label">Choose pickup location on the map</span>
+      <p className="muted map-help">Click the map to drop a pin. OpenStreetMap will look up the address when available; you can edit it.</p>
+      <div ref={mapContainerRef} className="pickup-map" aria-label="Map for choosing the pickup location" />
+      <button className="secondary locate-button" type="button" onClick={handleUseCurrentLocation}>Use my current location</button>
+      <p className="muted map-status" role="status" aria-live="polite">{status}</p>
+    </div>
+  );
+}
+
 function DonationPage({ currentUser, onSubmit, onNavigate }) {
   const [formData, setFormData] = useState({
     name: currentUser?.name || '',
@@ -481,10 +610,21 @@ function DonationPage({ currentUser, onSubmit, onNavigate }) {
     quantity: '',
     packing_assistance: 'Yes',
     address: '',
+    pickup_latitude: null,
+    pickup_longitude: null,
     pickup_date: '',
     pickup_time: '',
   });
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [mapResetKey, setMapResetKey] = useState(0);
+  const addressEditRef = useRef(0);
+
+  const updatePickupCoordinates = useCallback((coordinates) => {
+    setFormData((current) => ({ ...current, ...coordinates }));
+  }, []);
+  const updatePickupAddress = useCallback((address) => {
+    setFormData((current) => ({ ...current, address }));
+  }, []);
 
   useEffect(() => {
     setFormData((current) => ({
@@ -564,9 +704,15 @@ function DonationPage({ currentUser, onSubmit, onNavigate }) {
                   <label><input type="radio" name="packing_assistance" value="No" checked={formData.packing_assistance === 'No'} onChange={(event) => setFormData({ ...formData, packing_assistance: event.target.value })} /> No</label>
                 </div>
               </div>
+              <PickupLocationMap
+                key={mapResetKey}
+                addressEditRef={addressEditRef}
+                onLocationChange={updatePickupCoordinates}
+                onAddressLookup={updatePickupAddress}
+              />
               <div className="field full">
                 <label htmlFor="address">Pickup address</label>
-                <textarea id="address" name="address" rows="4" required value={formData.address} onChange={(event) => setFormData({ ...formData, address: event.target.value })} />
+                <textarea id="address" name="address" rows="4" required value={formData.address} onChange={(event) => { addressEditRef.current += 1; setFormData({ ...formData, address: event.target.value }); }} />
               </div>
               <div className="field">
                 <label htmlFor="pickup_date">Pickup date</label>
@@ -580,7 +726,7 @@ function DonationPage({ currentUser, onSubmit, onNavigate }) {
           </fieldset>
 
           <button className="primary" type="submit">Submit donation</button>
-          <button className="secondary" type="button" onClick={() => setFormData({ ...formData, food_items: '', quantity: '', address: '', pickup_date: '', pickup_time: '' })}>Clear form</button>
+          <button className="secondary" type="button" onClick={() => { addressEditRef.current += 1; setFormData((current) => ({ ...current, food_items: '', quantity: '', address: '', pickup_date: '', pickup_time: '', pickup_latitude: null, pickup_longitude: null })); setMapResetKey((current) => current + 1); }}>Clear form</button>
         </form>
       </section>
     </main>
@@ -700,6 +846,9 @@ function AdminDashboard({ users, donations, onStatusChange, onDeleteDonation, on
                         <div><dt>Food type</dt><dd>{donation.foodType}</dd></div>
                         <div><dt>Packing</dt><dd>{donation.packingAssistance}</dd></div>
                         <div><dt>Address</dt><dd>{donation.pickupAddress}</dd></div>
+                        {Number.isFinite(donation.pickupLatitude) && Number.isFinite(donation.pickupLongitude) && (
+                          <div><dt>Map pin</dt><dd><a href={`https://www.openstreetmap.org/?mlat=${donation.pickupLatitude}&mlon=${donation.pickupLongitude}#map=16/${donation.pickupLatitude}/${donation.pickupLongitude}`} target="_blank" rel="noopener noreferrer">Open map</a></dd></div>
+                        )}
                       </dl>
                     </details>
                   </td>
