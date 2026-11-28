@@ -189,6 +189,91 @@ function setupLogin() {
     });
 }
 
+function setupPickupMap() {
+    const mapElement = document.querySelector("#pickup-map");
+    const addressInput = document.querySelector("#address");
+    const latitudeInput = document.querySelector("#pickup-latitude");
+    const longitudeInput = document.querySelector("#pickup-longitude");
+    const status = document.querySelector("#map-status");
+    const locateButton = document.querySelector("#locate-me");
+    if (!mapElement || !addressInput || !latitudeInput || !longitudeInput || !status || !locateButton) return;
+    if (typeof L === "undefined") {
+        status.textContent = "The map could not be loaded. Enter the pickup address manually.";
+        return;
+    }
+    const map = L.map(mapElement).setView([20.5937, 78.9629], 5);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    let marker = null;
+    let lookupTimer = null;
+    let lastLookupStarted = 0;
+    let selectionId = 0;
+    let manualEditId = 0;
+    addressInput.addEventListener("input", () => { manualEditId += 1; });
+    const lookupAddress = async (latitude, longitude, selectedId, editId) => {
+        lastLookupStarted = Date.now();
+        status.textContent = "Looking up the address for this pin...";
+        try {
+            const query = new URLSearchParams({ format: "jsonv2", lat: latitude, lon: longitude });
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${query}`);
+            if (!response.ok) throw new Error(`Address lookup failed with status ${response.status}.`);
+            const result = await response.json();
+            if (selectedId !== selectionId) return;
+            if (!result.display_name) throw new Error("No address was returned for this point.");
+            if (editId !== manualEditId) {
+                status.textContent = "Pin selected. Your manually edited address was kept.";
+                return;
+            }
+            addressInput.value = result.display_name;
+            status.textContent = "Pickup address updated from the map pin.";
+        } catch (error) {
+            console.error("Could not look up the pickup address.", error);
+            if (selectedId === selectionId) status.textContent = "Could not look up this address. Enter or correct it manually.";
+        }
+    };
+    const selectLocation = (location) => {
+        selectionId += 1;
+        const selectedId = selectionId;
+        const editId = manualEditId;
+        const latitude = location.lat;
+        const longitude = location.lng;
+        latitudeInput.value = latitude.toFixed(6);
+        longitudeInput.value = longitude.toFixed(6);
+        if (marker) marker.setLatLng(location);
+        else marker = L.marker(location).addTo(map);
+        status.textContent = "Pin selected. Looking up the address...";
+        window.clearTimeout(lookupTimer);
+        const wait = Math.max(1100 - (Date.now() - lastLookupStarted), 0);
+        lookupTimer = window.setTimeout(() => lookupAddress(latitude, longitude, selectedId, editId), wait);
+    };
+    map.on("click", (event) => selectLocation(event.latlng));
+    locateButton.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+            status.textContent = "Location access is not available in this browser. You can still click the map.";
+            return;
+        }
+        status.textContent = "Finding your current location...";
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const location = L.latLng(position.coords.latitude, position.coords.longitude);
+                map.setView(location, 16);
+                selectLocation(location);
+            },
+            () => { status.textContent = "Could not access your location. Check browser permission or click the map."; }
+        );
+    });
+    mapElement.closest("form").addEventListener("reset", () => {
+        selectionId += 1;
+        window.clearTimeout(lookupTimer);
+        if (marker) { marker.remove(); marker = null; }
+        latitudeInput.value = "";
+        longitudeInput.value = "";
+        status.textContent = "Choose a point on the map or enter the pickup address below.";
+    });
+}
+
 function setupDonationForm() {
     const form = document.querySelector("#donation-form");
     if (!form) {
@@ -224,6 +309,8 @@ function setupDonationForm() {
             quantity: Number(data.get("quantity")),
             packingAssistance: data.get("packing_assistance"),
             pickupAddress: data.get("address").trim(),
+            pickupLatitude: data.get("pickup_latitude") ? Number(data.get("pickup_latitude")) : null,
+            pickupLongitude: data.get("pickup_longitude") ? Number(data.get("pickup_longitude")) : null,
             pickupDate: data.get("pickup_date"),
             pickupTime: data.get("pickup_time"),
             status: "Pending",
@@ -301,7 +388,7 @@ function setupAdminDashboard() {
         donationBody.innerHTML = donations.length ? donations.map((donation) => `<tr>
             <td>${donation.id}</td><td>${donation.donorName}<br><span class="muted">${donation.email}</span></td>
             <td>${donation.foodItems}<br>${donation.quantity}</td><td>${formatDate(donation.pickupDate)}<br>${donation.pickupTime}</td>
-            <td><details><summary>View</summary><dl class="detail-list"><div><dt>Phone</dt><dd>${donation.phone}</dd></div><div><dt>Food type</dt><dd>${donation.foodType}</dd></div><div><dt>Packing</dt><dd>${donation.packingAssistance}</dd></div><div><dt>Address</dt><dd>${donation.pickupAddress}</dd></div></dl></details></td>
+            <td><details><summary>View</summary><dl class="detail-list"><div><dt>Phone</dt><dd>${donation.phone}</dd></div><div><dt>Food type</dt><dd>${donation.foodType}</dd></div><div><dt>Packing</dt><dd>${donation.packingAssistance}</dd></div><div><dt>Address</dt><dd>${donation.pickupAddress}</dd></div>${Number.isFinite(donation.pickupLatitude) && Number.isFinite(donation.pickupLongitude) ? `<div><dt>Map pin</dt><dd><a href="https://www.openstreetmap.org/?mlat=${donation.pickupLatitude}&amp;mlon=${donation.pickupLongitude}#map=16/${donation.pickupLatitude}/${donation.pickupLongitude}" target="_blank" rel="noopener noreferrer">Open map</a></dd></div>` : ""}</dl></details></td>
             <td><select data-status-id="${donation.id}" aria-label="Change status for ${donation.id}">${STATUSES.map((status) => `<option ${status === donation.status ? "selected" : ""}>${status}</option>`).join("")}</select></td>
             <td><button class="danger" data-delete-id="${donation.id}" type="button">Delete</button></td>
         </tr>`).join("") : `<tr><td class="empty-state" colspan="7">No donation records yet.</td></tr>`;
@@ -323,6 +410,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupCommonPage();
     setupSignup();
     setupLogin();
+    setupPickupMap();
     setupDonationForm();
     setupUserDashboard();
     setupAdminDashboard();
